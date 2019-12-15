@@ -76,7 +76,7 @@ def check_env(env, warn=True):
                           "cf https://stable-baselines.readthedocs.io/en/master/guide/custom_policy.html")
 
     if warn and isinstance(observation_space, spaces.Box) and len(observation_space.shape) not in [1, 3]:
-        warnings.warn("Your observation has not a conventional shape (neither an image, nor a 1D vector). "
+        warnings.warn("Your observation has an unconventional shape (neither an image, nor a 1D vector). "
                       "We recommend you to flatten the observation "
                       "to have only a 1D vector")
 
