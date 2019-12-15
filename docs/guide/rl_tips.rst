@@ -171,7 +171,7 @@ Some basic advice:
 - debug with random actions to check that your environment works and follows the gym interface:
 
 
-We provide an helper to check that your environment should run without error:
+We provide a helper to check that your environment runs without error:
 
 .. code-block:: python
 
