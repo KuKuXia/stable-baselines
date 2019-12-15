@@ -182,7 +182,7 @@ We provide a helper to check that your environment runs without error:
 	check_env(env)
 
 
-If you want to try quickly a random agent on your environment, you can also do:
+If you want to quickly try a random agent on your environment, you can also do:
 
 .. code-block:: python
 
