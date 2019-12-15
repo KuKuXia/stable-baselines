@@ -23,6 +23,9 @@ def test_env(env_id):
     # in [-2, 2] and not [-1, 1]
     if env_id == 'Pendulum-v0':
         assert len(record) == 1
+    else:
+        # The other environments must pass without warning
+        assert len(record) == 0
 
 
 @pytest.mark.parametrize("env_class", [IdentityEnv, IdentityEnvBox, BitFlippingEnv])
