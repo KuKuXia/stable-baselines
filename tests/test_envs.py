@@ -33,7 +33,7 @@ def test_custom_envs(env_class):
 
 def test_failures_and_warnings():
     """
-    Test that common failure cases are catched
+    Test that common failure cases are caught
     """
     env = gym.make('BreakoutNoFrameskip-v4')
     # Change the observation space
