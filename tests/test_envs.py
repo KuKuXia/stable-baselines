@@ -34,73 +34,91 @@ def test_custom_envs(env_class):
     check_env(env)
 
 
-def test_failures_and_warnings():
-    """
-    Test that common failure cases are caught
-    """
+@pytest.mark.parametrize("new_obs_space", [
+    # Small image
+    spaces.Box(low=0, high=255, shape=(32, 32, 3), dtype=np.uint8),
+    # Range not in [0, 255]
+    spaces.Box(low=0, high=1, shape=(64, 64, 3), dtype=np.uint8),
+    # Wrong dtype
+    spaces.Box(low=0, high=255, shape=(64, 64, 3), dtype=np.float32),
+    # Not an image, it should be a 1D vector
+    spaces.Box(low=-1, high=1, shape=(64, 3), dtype=np.float32),
+    # Tuple space is not supported by SB
+    spaces.Tuple([spaces.Discrete(5), spaces.Discrete(10)]),
+    # Dict space is not supported by SB when env is not a GoalEnv
+    spaces.Dict({"position": spaces.Discrete(5)}),
+])
+def test_non_default_spaces(new_obs_space):
     env = gym.make('BreakoutNoFrameskip-v4')
-    # Change the observation space
-    non_default_spaces = [
-        # Small image
-        spaces.Box(low=0, high=255, shape=(32, 32, 3), dtype=np.uint8),
-        # Range not in [0, 255]
-        spaces.Box(low=0, high=1, shape=(64, 64, 3), dtype=np.uint8),
-        # Wrong dtype
-        spaces.Box(low=0, high=255, shape=(64, 64, 3), dtype=np.float32),
-        # Not an image, it should be a 1D vector
-        spaces.Box(low=-1, high=1, shape=(64, 3), dtype=np.float32),
-        # Tuple space is not supported by SB
-        spaces.Tuple([spaces.Discrete(5), spaces.Discrete(10)]),
-        # Dict space is not supported by SB when env is not a GoalEnv
-        spaces.Dict({"position": spaces.Discrete(5)}),
-    ]
-    for new_obs_space in non_default_spaces:
-        env.observation_space = new_obs_space
-        # Patch methods to avoid errors
-        env.reset = new_obs_space.sample
-        def patched_step(_action):
-            return new_obs_space.sample(), 0.0, False, {}
-        env.step = patched_step
-        with pytest.warns(UserWarning):
-            check_env(env)
+    env.observation_space = new_obs_space
+    # Patch methods to avoid errors
+    env.reset = new_obs_space.sample
+    def patched_step(_action):
+        return new_obs_space.sample(), 0.0, False, {}
+    env.step = patched_step
+    with pytest.warns(UserWarning):
+        check_env(env)
 
+
+def check_reset_assert_error(env, new_reset_return):
+    """
+    Helper to check that the error is caught.
+    :param env: (gym.Env)
+    :param new_reset_return: (Any)
+    """
+    def wrong_reset():
+        return new_reset_return
+    # Patch the reset method with a wrong one
+    env.reset = wrong_reset
+    with pytest.raises(AssertionError):
+        check_env(env)
+
+
+def test_common_failures_reset():
+    """
+    Test that common failure cases of the `reset_method` are caught
+    """
     env = IdentityEnvBox()
     # Return an observation that does not match the observation_space
-    def reset_wrong_shape():
-        return np.ones((3,))
-
-    env.reset = reset_wrong_shape
-    with pytest.raises(AssertionError):
-        check_env(env)
+    check_reset_assert_error(env, np.ones((3,)))
+    # The observation is not a numpy array
+    check_reset_assert_error(env, 1)
 
     # Return not only the observation
-    def reset_tuple():
-        return env.observation_space.sample(), False
+    check_reset_assert_error(env, (env.observation_space.sample(), False))
 
-    env.reset = reset_tuple
+
+def check_step_assert_error(env, new_step_return=()):
+    """
+    Helper to check that the error is caught.
+    :param env: (gym.Env)
+    :param new_step_return: (tuple)
+    """
+    def wrong_step(_action):
+        return new_step_return
+    # Patch the step method with a wrong one
+    env.step = wrong_step
     with pytest.raises(AssertionError):
         check_env(env)
+
+
+def test_common_failures_step():
+    """
+    Test that common failure cases of the `step` method are caught
+    """
+    env = IdentityEnvBox()
+
+    # Wrong shape for the observation
+    check_step_assert_error(env, (np.ones((4,)), 1.0, False, {}))
+    # Obs is not a numpy array
+    check_step_assert_error(env, (1, 1.0, False, {}))
 
     # Return a wrong reward
-    def step_wrong_reward(_action):
-        return env.observation_space.sample(), np.ones(1), False, {}
-
-    env.step = step_wrong_reward
-    with pytest.raises(AssertionError):
-        check_env(env)
+    check_step_assert_error(env, (env.observation_space.sample(), np.ones(1), False, {}))
 
     # Info dict is not returned
-    def step_no_info(_action):
-        return env.observation_space.sample(), 0.0, False
-
-    env.step = step_no_info
-    with pytest.raises(AssertionError):
-        check_env(env)
+    check_step_assert_error(env, (env.observation_space.sample(), 0.0, False))
 
     # Done is not a boolean
-    def step_wrong_done(_action):
-        return env.observation_space.sample(), 0.0, 3.0, False
-
-    env.step = step_wrong_done
-    with pytest.raises(AssertionError):
-        check_env(env)
+    check_step_assert_error(env, (env.observation_space.sample(), 0.0, 3.0, {}))
+    check_step_assert_error(env, (env.observation_space.sample(), 0.0, 1, {}))

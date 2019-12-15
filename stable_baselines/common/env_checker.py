@@ -160,7 +160,7 @@ def _check_render(env: gym.Env, warn=True, headless=False):
         env.close()
 
 
-def check_env(env: gym.Env, warn=True):
+def check_env(env: gym.Env, warn=True, skip_render_check=True):
     """
     Check that an environment follows Gym API.
     This is particularly useful when using a custom environment.
@@ -172,6 +172,8 @@ def check_env(env: gym.Env, warn=True):
     :param env: (gym.Env) The Gym environment that will be checked
     :param warn: (bool) Whether to output additional warnings
         mainly related to the interaction with Stable Baselines
+    :param skip_render_check: (bool) Whether to skip the checks for the render method.
+        True by default (useful for the CI)
     """
     assert isinstance(env, gym.Env), ("You environment must inherit from gym.Env class "
                                       " cf https://github.com/openai/gym/blob/master/gym/core.py")
@@ -208,7 +210,8 @@ def check_env(env: gym.Env, warn=True):
     _check_returned_values(env, observation_space, action_space)
 
     # ==== Check the render method and the declared render modes ====
-    _check_render(env, warn=warn, headless=True)
+    if not skip_render_check:
+        _check_render(env, warn=warn)
 
     # The check only works with numpy arrays
     if _enforce_array_obs(observation_space):
