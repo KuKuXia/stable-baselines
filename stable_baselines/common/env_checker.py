@@ -16,7 +16,7 @@ def _enforce_array_obs(observation_space: spaces.Space) -> bool:
     return not isinstance(observation_space, (spaces.Dict, spaces.Tuple))
 
 
-def _check_image_input(observation_space: spaces.Space):
+def _check_image_input(observation_space: spaces.Space) -> None:
     """
     Check that the input will be compatible with Stable-Baselines
     when the observation is apparently an image.
