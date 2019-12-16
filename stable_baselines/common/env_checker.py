@@ -29,7 +29,7 @@ def _check_image_input(observation_space: spaces.Space):
 
     if np.any(observation_space.low != 0) or np.any(observation_space.high != 255):
         warnings.warn("It seems that your observation space is an image but the "
-                      "high and lower bounds are not in [0, 255]. "
+                      "upper and lower bounds are not in [0, 255]. "
                       "Because the CNN policy normalize automatically the observation "
                       "you may encounter issue if the values are not in that range."
                     )
