@@ -160,7 +160,7 @@ def _check_render(env: gym.Env, warn=True, headless=False) -> None:
         env.close()
 
 
-def check_env(env: gym.Env, warn=True, skip_render_check=True):
+def check_env(env: gym.Env, warn=True, skip_render_check=True) -> None:
     """
     Check that an environment follows Gym API.
     This is particularly useful when using a custom environment.
