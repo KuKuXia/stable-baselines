@@ -68,7 +68,7 @@ def _check_nan(env: gym.Env) -> None:
 
 def _check_obs(obs: Union[tuple, dict, np.ndarray, int],
                observation_space: spaces.Space,
-               method_name: str):
+               method_name: str) -> None:
     """
     Check that the observation returned by the environment
     correspond to the declared one.
