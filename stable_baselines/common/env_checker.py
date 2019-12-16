@@ -132,7 +132,7 @@ def _check_spaces(env: gym.Env):
     assert isinstance(env.action_space, spaces.Space), "The action space must inherit from gym.spaces" + gym_spaces
 
 
-def _check_render(env: gym.Env, warn=True, headless=False):
+def _check_render(env: gym.Env, warn=True, headless=False) -> None:
     """
     Check the declared render modes and the `render()`/`close()`
     method of the environment.
