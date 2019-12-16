@@ -86,7 +86,7 @@ def _check_obs(obs: Union[tuple, dict, np.ndarray, int],
     assert observation_space.contains(obs), "The observation returned by the `{}()` method does not match the given observation space".format(method_name)
 
 
-def _check_returned_values(env: gym.Env, observation_space: spaces.Space, action_space: spaces.Space):
+def _check_returned_values(env: gym.Env, observation_space: spaces.Space, action_space: spaces.Space) -> None:
     """
     Check the returned values by the env when calling `.reset()` or `.step()` methods.
     """
