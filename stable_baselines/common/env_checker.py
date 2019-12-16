@@ -181,7 +181,7 @@ def check_env(env: gym.Env, warn=True, skip_render_check=True) -> None:
     # ============= Check the spaces (observation and action) ================
     _check_spaces(env)
 
-    # Define aliases for convenienve
+    # Define aliases for convenience
     observation_space = env.observation_space
     action_space = env.action_space
 
