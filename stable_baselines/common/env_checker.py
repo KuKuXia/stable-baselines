@@ -40,7 +40,7 @@ def _check_image_input(observation_space: spaces.Space) -> None:
                       "cf https://stable-baselines.readthedocs.io/en/master/guide/custom_policy.html")
 
 
-def _check_unsupported_obs_spaces(env: gym.Env, observation_space: spaces.Space):
+def _check_unsupported_obs_spaces(env: gym.Env, observation_space: spaces.Space) -> None:
     """Emit warnings when the observation space used is not supported by Stable-Baselines."""
 
     if isinstance(observation_space, spaces.Dict) and not isinstance(env, gym.GoalEnv):
