@@ -116,7 +116,7 @@ def _check_returned_values(env: gym.Env, observation_space: spaces.Space, action
         assert reward == env.compute_reward(obs['achieved_goal'], obs['desired_goal'], info)
 
 
-def _check_spaces(env: gym.Env):
+def _check_spaces(env: gym.Env) -> None:
     """
     Check that the observation and action spaces are defined
     and inherit from gym.spaces.Space.
