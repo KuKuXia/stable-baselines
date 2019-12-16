@@ -58,7 +58,7 @@ def _check_unsupported_obs_spaces(env: gym.Env, observation_space: spaces.Space)
                     )
 
 
-def _check_nan(env: gym.Env):
+def _check_nan(env: gym.Env) -> None:
     """Check for Inf and NaN using the VecWrapper."""
     vec_env = VecCheckNan(DummyVecEnv([lambda: env]))
     for _ in range(10):
