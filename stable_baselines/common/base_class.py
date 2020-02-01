@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections import deque
 import os
 import glob
 import warnings
@@ -14,6 +15,7 @@ import tensorflow as tf
 from stable_baselines.common.misc_util import set_global_seeds
 from stable_baselines.common.save_util import data_to_json, json_to_data, params_to_bytes, bytes_to_params
 from stable_baselines.common.policies import get_policy_from_name, ActorCriticPolicy
+from stable_baselines.common.runners import AbstractEnvRunner
 from stable_baselines.common.vec_env import VecEnvWrapper, VecEnv, DummyVecEnv
 from stable_baselines import logger
 
@@ -57,6 +59,8 @@ class BaseRLModel(ABC):
         self.seed = seed
         self._param_load_ops = None
         self.n_cpu_tf_sess = n_cpu_tf_sess
+        self.episode_reward = None
+        self.ep_info_buf = None
 
         if env is not None:
             if isinstance(env, str):
@@ -138,6 +142,10 @@ class BaseRLModel(ABC):
 
         self.env = env
 
+        # Invalidated by environment change.
+        self.episode_reward = None
+        self.ep_info_buf = None
+
     def _init_num_timesteps(self, reset_num_timesteps=True):
         """
         Initialize and resets num_timesteps (total timesteps since beginning of training)
@@ -189,6 +197,10 @@ class BaseRLModel(ABC):
         if self.env is None:
             raise ValueError("Error: cannot train the model without a valid environment, please set an environment with"
                              "set_env(self, env) method.")
+        if self.episode_reward is None:
+            self.episode_reward = np.zeros((self.n_envs,))
+        if self.ep_info_buf is None:
+            self.ep_info_buf = deque(maxlen=100)
 
     @abstractmethod
     def get_parameter_list(self):
@@ -736,6 +748,24 @@ class ActorCriticRLModel(BaseRLModel):
         self.step = None
         self.proba_step = None
         self.params = None
+        self._runner = None
+
+    def _make_runner(self) -> AbstractEnvRunner:
+        """Builds a new Runner.
+
+        Lazily called whenever `self.runner` is accessed and `self._runner is None`.
+        """
+        raise NotImplementedError("This model is not configured to use a Runner")
+
+    @property
+    def runner(self) -> AbstractEnvRunner:
+        if self._runner is None:
+            self._runner = self._make_runner()
+        return self._runner
+
+    def set_env(self, env):
+        self._runner = None  # New environment invalidates `self._runner`.
+        super().set_env(env)
 
     @abstractmethod
     def setup_model(self):
